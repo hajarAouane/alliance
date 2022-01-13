@@ -14,6 +14,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.AudioClip;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
@@ -65,14 +66,14 @@ public class Checkers extends Application {
 	Label Player2 = new Label("Player 1");
 	Label Play1 = new Label();
 	Label Play2 = new Label();
-	Button hint = new Button("Hint");
-	
+	AudioClip sound1 = new AudioClip(getClass().getResource("sound1.mp3").toString());
+	AudioClip gameover = new AudioClip(getClass().getResource("gameover.mp3").toString());
 	
 	
 
 	public void start(Stage stage) {
 		root = new Pane();
-		
+		//writeObject();
 		this.stage = stage;
 		ImageView start = new ImageView(getClass().getResource("start.png").toString());
 		message = new Label("Click \"New Game\" to begin.");
@@ -178,7 +179,7 @@ TextField player2 = new TextField();
 		Scene scene1 = new Scene(root1); 
 		
 		newGameButton.setGraphic(start);
-		hint.relocate(370, 400);
+		
 		
 		Stage stage2 = new Stage();
 		stage2.setTitle("About Alliance");
@@ -206,6 +207,7 @@ TextField player2 = new TextField();
 		stage.setResizable(false);
 		stage.setTitle("Checkers!");
 		stage.show();
+		sound1.play();
 		
 	}
 	
@@ -338,6 +340,7 @@ TextField player2 = new TextField();
 		// -------------------------------
 
 		void gameOver(String str) {
+			gameover.play();
 			message.setText(str);
 			newGameButton.setDisable(false);
 			resignButton.setDisable(true);
@@ -643,9 +646,9 @@ TextField player2 = new TextField();
 		}
           //move
 		void makeMove(int fromRow, int fromCol, int toRow, int toCol) {
-			
+			 AudioClip move = new AudioClip(getClass().getResource("move.mp3").toString());
 			board[toRow][toCol] = board[fromRow][fromCol];
-
+			move.play();
 			
 			//if(changer == false) {
 			if (pieceAt(fromRow, fromCol) == RED_DIA) {
@@ -1046,12 +1049,17 @@ TextField player2 = new TextField();
 				if (board[r2][c2] == RED_KING || board[r2][c2] == BLACK_KING)
 					return false;
 			}
-			if(board[r1][c1] == RED_KING && board[r2][c2] == BLACK_KING) {
+			
+				if(board[r1][c1] == RED_KING && board[r2][c2] == BLACK_KING) {
+					
+					  return true;
+				   	
+				}
+				
+			
+				if (board[r1][c1] == BLACK_KING && board[r2][c2] == RED_KING) {
 					return true;
-			}
-			if (board[r1][c1] == BLACK_KING && board[r2][c2] == RED_KING) {
-				return true;
-			}
+				}
 			
 			
 			if (player == RED) {
