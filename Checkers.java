@@ -3,7 +3,6 @@ package jeuDesDames;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.beans.property.Property;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -26,7 +25,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
-import javafx.scene.text.TextAlignment;
 import javafx.scene.input.MouseEvent;
 
 import java.util.ArrayList;
@@ -54,7 +52,6 @@ public class Checkers extends Application {
 	public static Label movementsMsgs;
 	public int currentPLayer;
 	Stage stage;
-	private StatusBar statusBar;
 	int timeoverA = 0;
 	int timeoverB = 0;
 	Button Changer = new Button("Changer");
@@ -70,20 +67,7 @@ public class Checkers extends Application {
 	Label Play2 = new Label();
 	Button hint = new Button("Hint");
 	
-	/*public void timerOver(int playerOutOfTime)
-	{ sortir normal 
-		timer.timeline.stop();
-		if (playerOutOfTime == 1)
-		{
-			statusBar.whitePlayerAlert.setText("White player run out of time");
-			statusBar.winner.setText("Black player won !");
-		}
-		else if (playerOutOfTime == 2)
-		{
-			statusBar.blackPlayerAlert.setText("Black player run out of time");
-			statusBar.winner.setText("White player won !");
-		}
-	}*/
+	
 	
 
 	public void start(Stage stage) {
@@ -109,7 +93,7 @@ public class Checkers extends Application {
 		// saveGameButton.setOnAction(e -> board.saveGame());
 		board.setOnMousePressed(e -> board.mousePressed(e));
 		//Changer.setOnAction(null);
-		
+		//board.chang.relocate(20, 300);
 		
 		
 		board.relocate(20,80);
@@ -212,7 +196,7 @@ TextField player2 = new TextField();
     root1.setStyle("-fx-background-color: BISQUE; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.4), 75, 0.5, 0, 10);");
 		stage2.setScene(scene3);
 		saveGameButton.setOnAction(e -> {stage2.show();});
-		root.getChildren().addAll(board, newGameButton,Play1,Play2, Player1,Player2,timeB,timeW, resignButton, message, saveGameButton,movementsMsgs);
+		root.getChildren().addAll(board, newGameButton,Play1,Play2, board.chang,Player1,Player2,timeB,timeW, resignButton, message, saveGameButton,movementsMsgs);
 		
 		//root.setStyle("-fx-background-color: BISQUE; " + "-fx-border-color: darkred; -fx-border-width:3");
 		Scene scene = new Scene(root,500,550);
@@ -227,13 +211,6 @@ TextField player2 = new TextField();
 	
 	// -------------------- Classes -------------------------------
 
-	public StatusBar getStatusBar() {
-		return statusBar;
-	}
-
-	public void setStatusBar(StatusBar statusBar) {
-		this.statusBar = statusBar;
-	}
 
 
 	private static class CheckersMove {
@@ -262,6 +239,7 @@ TextField player2 = new TextField();
 		int noir = 10;
 		int blanc = 9;
 		
+		private Button chang = new Button ("change");
 		
 		public void time() {
 			
@@ -286,8 +264,6 @@ TextField player2 = new TextField();
 						timeB.setText(TimeUnit.SECONDS.toMinutes(secondsB) + ":" + (secondsB % 60));
 					}
 					if(seconds <= 0) {
-						score++;
-						System.out.println("scoreeeeeeee"+score);
 						gameOver("Sorry white you are out of time");
 						time.stop();
 					}if(secondsB <= 0) {
@@ -416,6 +392,7 @@ TextField player2 = new TextField();
 						message.setText(Play2.getText()+": You must continue jumping.");
 					else
 						message.setText(Play1.getText()+": You must continue jumping.");
+			
 				selectedRow = move.toRow;
 			    selectedCol = move.toCol;
 			    
@@ -429,11 +406,14 @@ TextField player2 = new TextField();
 			
 			
 			if (currentPlayer == CheckersData.RED ||currentPlayer == CheckersData.RED_DIA  ) {
-				
-					System.out.println(timeoverA);
+				if(currentPlayer == CheckersData.RED)	{
 				currentPlayer = CheckersData.BLACK;
-				
-				
+				System.out.println(timeoverA);
+				}
+				if(currentPlayer == CheckersData.RED_DIA)	{
+					currentPlayer = CheckersData.BLACK_DIA;
+					
+					}
 				legalMoves = board.getLegalMoves(currentPlayer);
 				if (legalMoves == null)
 					gameOver("BLACK has no moves.  RED wins.");
@@ -442,7 +422,15 @@ TextField player2 = new TextField();
 				else
 					message.setText(Play1.getText()+": Make your move.");
 			} else if(currentPlayer == CheckersData.BLACK ||currentPlayer == CheckersData.BLACK_DIA){
-				currentPlayer = CheckersData.RED;
+				if(currentPlayer == CheckersData.BLACK)	{
+					currentPlayer = CheckersData.RED;
+					
+					}
+					if(currentPlayer == CheckersData.BLACK_DIA)	{
+						currentPlayer = CheckersData.BLACK;
+						
+						}
+				
 				timeoverB  = -1;
 				
 				legalMoves = board.getLegalMoves(currentPlayer);
@@ -657,22 +645,24 @@ TextField player2 = new TextField();
 		void makeMove(int fromRow, int fromCol, int toRow, int toCol) {
 			
 			board[toRow][toCol] = board[fromRow][fromCol];
-			board[fromRow][fromCol] = EMPTY;
+
 			
 			//if(changer == false) {
-				/*if(board[toRow][toCol] == RED_DIA) {
-					board[toRow][toCol]=RED;
-				}
-				if(board[toRow][toCol] == BLACK_DIA) {
-					board[toRow][toCol]=BLACK;
-					
-				}
-				if(board[toRow][toCol] == RED) {
-					board[toRow][toCol]=RED_DIA;
-				}
-				if(board[toRow][toCol] == BLACK) {
-					board[toRow][toCol]=BLACK_DIA;
-				}*/
+			if (pieceAt(fromRow, fromCol) == RED_DIA) {
+				board[toRow][toCol] = RED;
+			}
+			if (pieceAt(fromRow, fromCol) == BLACK_DIA) {
+				board[toRow][toCol] = BLACK;
+
+			}
+			if (pieceAt(fromRow, fromCol) == RED) {
+				board[toRow][toCol] = RED_DIA;
+			}
+			if (pieceAt(fromRow, fromCol) == BLACK) {
+				board[toRow][toCol] = BLACK_DIA;
+			}
+			
+			board[fromRow][fromCol] = EMPTY;
 			//}
 			
 			//Killllllllll
@@ -909,7 +899,7 @@ TextField player2 = new TextField();
 			}
 		}
 //modiiiiiifier
-		CheckersMove[] getLegalJumpsFrom(int player, int row, int col) {
+		/*CheckersMove[] getLegalJumpsFrom(int player, int row, int col) {
 			if (player != RED && player != BLACK)
 				return null;
 			int playerKing; // The constant representing a King belonging to player.
@@ -917,6 +907,7 @@ TextField player2 = new TextField();
 				playerKing = RED_KING;
 			else
 				playerKing = BLACK_KING;
+			
 			ArrayList<CheckersMove> moves = new ArrayList<CheckersMove>(); // The legal jumps will be stored in this
 			// a modifierrrrrrrrrrrrrrrrrrrrrrrr																// list.
 			if (board[row][col] == player || board[row][col] == playerKing) {
@@ -939,8 +930,109 @@ TextField player2 = new TextField();
 					moveArray[i] = moves.get(i);
 				return moveArray;
 			}
+		}*/
+		CheckersMove[] getLegalJumpsFrom(int player, int row, int col) {
+			if (player != RED && player != BLACK)
+				return null;
+			int playerKing; // The constant representing a King belonging to player.
+			if (player == RED)
+				playerKing = RED_KING;
+			else
+				playerKing = BLACK_KING;
+			
+			ArrayList<CheckersMove> moves = new ArrayList<CheckersMove>(); // The legal jumps will be stored in this
+			// a modifierrrrrrrrrrrrrrrrrrrrrrrr																// list.
+			if(player == RED_KING || player == BLACK_KING) {
+				if (canJump(player, row, col, row + 1, col + 1, row +2, col + 2))
+					moves.add(new CheckersMove(row, col, row + 2, col + 2));
+				
+				
+				if (canJump(player, row, col, row + 1, col - 1, row + 2, col - 2))
+					moves.add(new CheckersMove(row, col, row + 2, col - 2));
+				if (canJump(player, row, col, row - 1, col - 1, row - 2, col - 2))
+					moves.add(new CheckersMove(row, col, row -2, col - 2));
+				if (canJump(player, row, col, row - 1, col + 1, row - 2, col + 2))
+					moves.add(new CheckersMove(row, col, row - 2, col + 2));
+				
+				if (canJump(player, row, col, row, col + 1, row , col + 2))
+					moves.add(new CheckersMove(row, col, row , col + 2));
+				if (canJump(player, row, col, row , col - 1, row, col - 2))
+					moves.add(new CheckersMove(row, col, row , col - 2));
+				if (canJump(player, row, col, row + 1, col, row+2, col))
+					moves.add(new CheckersMove(row, col, row + 2, col ));
+				if (canJump(player, row, col, row - 1, col, row-2, col))
+					moves.add(new CheckersMove(row, col, row - 2, col ));
+				
+				
+			}
+			
+			if(player == BLACK) {
+				pla = 2;
+				
+				
+			if (board[row][col] == BLACK || board[row][col] == playerKing) {//croix
+				if (canJump(player, row, col, row + 1, col + 1, row +2, col + 2))
+					moves.add(new CheckersMove(row, col, row + 2, col + 2));
+				
+				
+				if (canJump(player, row, col, row + 1, col - 1, row + 2, col - 2))
+					moves.add(new CheckersMove(row, col, row + 2, col - 2));
+				if (canJump(player, row, col, row - 1, col - 1, row - 2, col - 2))
+					moves.add(new CheckersMove(row, col, row -2, col - 2));
+				if (canJump(player, row, col, row - 1, col + 1, row - 2, col + 2))
+					moves.add(new CheckersMove(row, col, row - 2, col + 2));
+			
+			}
+			
+			if (board[row][col] == BLACK_DIA || board[row][col] == playerKing) {
+				
+				if (canJump(player, row, col, row, col + 1, row , col + 2))
+					moves.add(new CheckersMove(row, col, row , col + 2));
+				if (canJump(player, row, col, row , col - 1, row, col - 2))
+					moves.add(new CheckersMove(row, col, row , col - 2));
+				if (canJump(player, row, col, row + 1, col, row+2, col))
+					moves.add(new CheckersMove(row, col, row + 2, col ));
+				if (canJump(player, row, col, row - 1, col, row-2, col))
+					moves.add(new CheckersMove(row, col, row - 2, col ));
+			}
 		}
-
+			if(player == RED) {
+				pla =1;
+				
+				if (board[row][col] == RED || board[row][col] == playerKing) {
+					if (canJump(player, row, col, row - 1, col - 1, row-2 , col - 2))
+						moves.add(new CheckersMove(row, col, row-2 , col - 2));
+					if (canJump(player, row, col, row - 1, col + 1, row-2, col + 2))
+						moves.add(new CheckersMove(row, col, row- 2, col + 2));
+					if (canJump(player, row, col, row + 1, col + 1, row+2 , col + 2))
+						moves.add(new CheckersMove(row, col, row+2 , col + 2));
+					if (canJump(player, row, col, row + 1, col - 1, row+2, col - 2))
+						moves.add(new CheckersMove(row, col, row+ 2, col - 2));
+				}
+				
+				if (board[row][col] == RED_DIA || board[row][col] == playerKing) {
+					
+					if (canJump(player, row, col, row , col - 1, row , col - 2))
+						moves.add(new CheckersMove(row, col, row , col - 2));
+					if (canJump(player, row, col, row , col + 1, row, col +2 ))
+						moves.add(new CheckersMove(row, col, row , col + 2));
+					if (canJump(player, row, col, row - 1, col, row-2, col))
+						moves.add(new CheckersMove(row, col, row - 2, col ));
+					if (canJump(player, row, col, row + 1, col, row+2, col))
+						moves.add(new CheckersMove(row, col, row + 2, col ));
+				}
+				
+			
+			}
+			if (moves.size() == 0)
+				return null;
+			else {
+				CheckersMove[] moveArray = new CheckersMove[moves.size()];
+				for (int i = 0; i < moves.size(); i++)
+					moveArray[i] = moves.get(i);
+				return moveArray;
+			}
+		}
 		// -----------------------------
 
 		private boolean canJump(int player, int r1, int c1, int r2, int c2, int r3, int c3) {
