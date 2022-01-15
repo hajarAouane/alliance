@@ -3,6 +3,7 @@ package jeuDesDames;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -28,7 +29,12 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.input.MouseEvent;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 
@@ -45,7 +51,9 @@ public class Checkers extends Application {
 	private Integer seconds = startTime;
 	private Integer secondsB = startTime;
 	CheckersBoard board;
-	CheckersBoard board1;
+	private Exit rooot = new Exit();
+	
+		
 	private Button newGameButton;
 	private Button resignButton;
 	private Button saveGameButton;
@@ -56,7 +64,8 @@ public class Checkers extends Application {
 	int timeoverA = 0;
 	int timeoverB = 0;
 	Button Changer = new Button("Changer");
-		static Boolean changer;	
+	static Boolean changer;	
+	Button restore = new Button ("restore");
 	
 	Timeline time = new Timeline();
 	Label timeB = new Label("100");
@@ -68,7 +77,7 @@ public class Checkers extends Application {
 	Label Play2 = new Label();
 	AudioClip sound1 = new AudioClip(getClass().getResource("sound1.mp3").toString());
 	AudioClip gameover = new AudioClip(getClass().getResource("gameover.mp3").toString());
-	
+	Button chang = new Button("Flip Piece");
 	
 
 	public void start(Stage stage) {
@@ -77,12 +86,10 @@ public class Checkers extends Application {
 		this.stage = stage;
 		ImageView start = new ImageView(getClass().getResource("start.png").toString());
 		message = new Label("Click \"New Game\" to begin.");
-		movementsMsgs = new Label("Movements");
+		
 		message.setTextFill(Color.BLACK); // Light green.
 		message.setFont(Font.font(null, FontWeight.BOLD, 14));
-		movementsMsgs.setTextFill(Color.rgb(100, 255, 100)); // Light green.
-		 
-		movementsMsgs.setFont(Font.font(null, FontWeight.BOLD, 9));
+		
 		newGameButton = new Button();
 		resignButton = new Button("Resign");
 		saveGameButton = new Button("Help");
@@ -98,39 +105,38 @@ public class Checkers extends Application {
 		
 		
 		board.relocate(20,80);
-		newGameButton.relocate(370, 200);
+		newGameButton.relocate(100, 500);
 		//Changer.relocate(370, 440);
-		saveGameButton.relocate(370, 250);
-		resignButton.relocate(370, 300);
+		saveGameButton.relocate(260, 500);
+		resignButton.relocate(20, 500);
 		message.relocate(20, 450);
-		movementsMsgs.relocate(20,500);
+		restore.setOnAction(e -> board.restoreAndShow());
+		rooot.RestoreGFromDB.setOnAction(e -> {board.PrintPPositions(); Platform.exit();});
 		timeB.relocate(300, 50);
 		timeW.relocate(300, 420);
 		resignButton.setManaged(false);
 		resignButton.resize(70, 30);
 		newGameButton.setManaged(false);
-		newGameButton.resize(50, 30);
+		newGameButton.resize(70, 30);
 		saveGameButton.setManaged(false);
-		saveGameButton.resize(50, 30);
-Button valider1 = new Button("Play");	
-TextField player2 = new TextField();
-		player2.setPrefColumnCount(20);
-		 
-		TextField player1 = new TextField();
-		player1.setPrefColumnCount(20);
+		saveGameButton.resize(70, 30);
+		restore.resize(70, 30);
+		restore.setManaged(false);
+		restore.relocate(180, 500);
+		
+		chang.relocate(370, 230);
+		
+		Alliance root1 = new Alliance();
+	
 
+		chang.getStylesheets().add(getClass().getResource("anim.css").toString());
+		chang.getStyleClass().add("start");
+	
 		
-		VBox root1 = new VBox(10);
-		HBox ro = new HBox(20);
-		VBox roo = new VBox(6);
-		VBox roo1 = new VBox(6);
-		root1.setPadding(new Insets(10));
+		restore.getStylesheets().add(getClass().getResource("anim.css").toString());
+		restore.getStyleClass().add("start");
 		
-		valider1.setMaxSize(100, 60);
-		
-		valider1.getStylesheets().add(getClass().getResource("square.css").toString());
-		valider1.getStyleClass().add("valider1");
-		
+
 		
 		newGameButton.getStylesheets().add(getClass().getResource("anim.css").toString());
 		newGameButton.getStyleClass().add("start");
@@ -140,9 +146,7 @@ TextField player2 = new TextField();
 		
 		resignButton.getStylesheets().add(getClass().getResource("anim.css").toString());
 		resignButton.getStyleClass().add("start");
-		//root1.getStylesheets().add(getClass().getResource("square.css").toString());
-		//root1.getStyleClass().add("scene");
-		Label label1 = new Label("Player 1");
+
 		
 		
 		Player1.setFont(Font.font("NewSerif", FontWeight.EXTRA_BOLD, 14));
@@ -156,28 +160,19 @@ TextField player2 = new TextField();
 		Player1.setTextFill(Color.valueOf("#B8860B"));
 		Player2.setTextFill(Color.valueOf("#B8860B"));
 		
-		Play1.textProperty().bind(player1.textProperty());
+		Play1.textProperty().bind(root1.player1.textProperty());
 		
 		Play1.setTextFill(Color.BLACK);
 		Play2.setTextFill(Color.WHITE);
 		Play1.setFont(Font.font("NewSerif", FontWeight.BOLD, FontPosture.ITALIC, 12));
 		Play2.setFont(Font.font("NewSerif", FontWeight.BOLD,FontPosture.ITALIC, 12));
 		
-		Play2.textProperty().bind(player2.textProperty());
+		Play2.textProperty().bind(root1.player2.textProperty());
 		
-		player1.setPromptText("entez votre nom");
-		player2.setPromptText("entez votre nom");
-		roo.getChildren().addAll(label1,player1);
-		roo1.getChildren().addAll(new Label("Player 2"),player2);
-		ro.getChildren().addAll(roo,roo1);
-		Label welcome = new Label("Welcome");
-		//welcome.getStylesheets().add(getClass().getResource("square.css").toString());
-	    //welcome.getStyleClass().add("valider1");
-	
-		root1.getChildren().addAll(ro,valider1);
-		root1.setAlignment(Pos.CENTER);
+
 		Scene scene1 = new Scene(root1); 
-		
+		Scene exit1 = new Scene(rooot,300,100);
+		rooot.getExit().setOnAction(e -> {Platform.exit();});
 		newGameButton.setGraphic(start);
 		
 		
@@ -186,7 +181,7 @@ TextField player2 = new TextField();
 		BorderPane aide = new BorderPane();
 		Label aid = new Label();
 		aide.setCenter(aid);
-	root.setStyle("-fx-background-color: BISQUE; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.4), 75, 0.5, 0, 10);");
+		root.setStyle("-fx-background-color: BISQUE; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.4), 75, 0.5, 0, 10);");
 		root.setPadding(new Insets(20));
 		Scene scene3 = new Scene(aide);
 		ImageView iv = new ImageView(getClass().getResource("aide.png").toString());
@@ -194,16 +189,17 @@ TextField player2 = new TextField();
     	iv.setFitHeight(500);
         
     	aid.setGraphic(iv);
-    root1.setStyle("-fx-background-color: BISQUE; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.4), 75, 0.5, 0, 10);");
+    	Stage stag3 = new Stage();
+    	
 		stage2.setScene(scene3);
+		stage.setOnCloseRequest(e -> {stag3.setScene(exit1); stag3.show();});
 		saveGameButton.setOnAction(e -> {stage2.show();});
-		root.getChildren().addAll(board, newGameButton,Play1,Play2, board.chang,Player1,Player2,timeB,timeW, resignButton, message, saveGameButton,movementsMsgs);
+		root.getChildren().addAll(board, newGameButton,Play1,Play2,Player1,chang,restore,Player2,timeB,timeW, resignButton, message, saveGameButton);
 		
-		//root.setStyle("-fx-background-color: BISQUE; " + "-fx-border-color: darkred; -fx-border-width:3");
 		Scene scene = new Scene(root,500,550);
 		stage.setScene(scene1);
 		stage.setResizable(true);
-		valider1.setOnAction(e->{stage.setScene(scene);});
+		root1.getValider().setOnAction(e->{stage.setScene(scene);});
 		stage.setResizable(false);
 		stage.setTitle("Checkers!");
 		stage.show();
@@ -320,7 +316,127 @@ TextField player2 = new TextField();
 			DrowBoard();
 			
 		}
+		void restoreAndShow() {
+			board.board = restorePreviousGame(0);
+			DrowBoard();
+		}
 
+		int[][] restorePreviousGame(int q) {
+			// CheckersData backUpBoard;null
+			int[][] board = new int[8][8];
+			q = 0;
+			try {
+				int i = 0;
+				File myObj = new File("t.txt");
+				Scanner myReader = new Scanner(myObj); // read data line by line
+				while (myReader.hasNextLine()) {
+					char row;
+					char col;
+					char type;
+					String data = myReader.nextLine();
+					char[] x = data.toCharArray();
+					type = x[0]; // index 0 represent type
+					row = x[1]; // index 1 represent row
+					col = x[2]; // index 2 represent col
+					board[Integer.parseInt(String.valueOf(row))][Integer.parseInt(String.valueOf(col))] = Integer
+							.parseInt(String.valueOf(type)); // store all data in int format
+					// debugging
+					System.out.print(i + "-" + type + row + col + "\n");
+					i++;
+				}
+				myReader.close();
+			} catch (FileNotFoundException e) {
+				System.out.println("An error occurred.");
+				e.printStackTrace();
+			}
+			// debugging
+			// System.out.println("\n\n\n"+board.length);
+			return board;
+		}
+
+		// method to read stored game
+		void restorePreviousGame() {
+			// CheckersData backUpBoard;
+			int[][] board = new int[8][8];
+
+			try {
+				int i = 0;
+				File myObj = new File("t.txt");
+				Scanner myReader = new Scanner(myObj); // read data line by line
+				while (myReader.hasNextLine()) {
+					char row;
+					char col;
+					char type;
+					String data = myReader.nextLine();
+					char[] x = data.toCharArray();
+					type = x[0]; // index 0 represent type
+					row = x[1]; // index 1 represent row
+					col = x[2]; // index 2 represent col
+					board[Integer.parseInt(String.valueOf(row))][Integer.parseInt(String.valueOf(col))] = Integer
+							.parseInt(String.valueOf(type)); // store all data in int format
+					// debugging
+					System.out.print(i + "-" + type + row + col + "\n");
+					i++;
+				}
+				myReader.close();
+			} catch (FileNotFoundException e) {
+				System.out.println("An error occurred.");
+				e.printStackTrace();
+			}
+			// debugging
+			// System.out.println("\n\n\n"+board.length);
+		}
+
+		// SAVE game positions for next round
+		public void PrintPPositions() {
+			String player1 = new String();
+			String player2 = new String();
+			player1 = Play1.getText();
+			player2 = Play2.getText();
+			System.out.println("\n\nn" + player1 + "  " + player2);
+			if (gameInProgress) {
+				try {
+					FileWriter myWriter = new FileWriter("t.txt");
+					myWriter.flush(); // clean file every turn
+					System.out.println("Successfully wrote to the file.");
+
+					for (int i = 0; i < 8; ++i) { // i is row j is col
+						for (int j = 0; j < 8; ++j) {
+							if (board.pieceAt(i, j) == 0) {
+								myWriter.write("0" + i + j + "\n"); // empty
+								System.out.print("");
+							} else if (board.pieceAt(i, j) == 1) {
+								// fileWriter.append("Line 5").append("\n");
+								myWriter.write("1" + i + j + "\n"); // red
+								// System.out.println("RED " + i + " " + j);
+							} else if (board.pieceAt(i, j) == 2) {
+								myWriter.write("2" + i + j + "\n"); // red king
+								// System.out.println("2 is at " + i + " " + j);
+							} else if (board.pieceAt(i, j) == 3) {
+								myWriter.write("3" + i + j + "\n"); // black
+								// System.out.println("3 is at " + i + " " + j);
+							} else if (board.pieceAt(i, j) == 4) {
+								myWriter.write("4" + i + j + "\n"); // black king
+								// System.out.println("4 is at " + i + " " + j);
+							} else if (board.pieceAt(i, j) == 5) {
+								myWriter.write("5" + i + j + "\n"); // red_dia
+								// System.out.println("5 is at " + i + " " + j);
+							} else if (board.pieceAt(i, j) == 6) {
+								myWriter.write("6" + i + j + "\n"); // black_dia
+								// System.out.println("6 is at " + i + " " + j);
+							}
+						}
+					}
+
+					myWriter.close();
+				} catch (IOException e) {
+					System.out.println("An error occurred.");
+					e.printStackTrace();
+				}
+			}
+			restorePreviousGame();
+			// fileWriter.close();
+		}
 		// -----------------------------
 		void doResign() {
 			if (gameInProgress == false) {
@@ -500,7 +616,7 @@ TextField player2 = new TextField();
 					}
 					if (col == 7) {
 						String S = ""+aa;
-						 g.fillText(S, 30 + col * 40, 40+ row * 40);
+						 g.fillText(S, 30+ col * 40, 16+ row * 40);
 						 aa--;
 					}
 					
@@ -705,10 +821,12 @@ TextField player2 = new TextField();
 			}
 
 			ArrayList<CheckersMove> moves = new ArrayList<CheckersMove>(); // Moves will be stored in this list.
-			
+			int king =1;
 			for (int row = 0; row < 8; row++) {
 				for (int col = 0; col < 8; col++) {
-					if(player == RED_KING || player == BLACK_KING) {
+					if (king == 0) {
+					if(board[row][col] == RED_KING || board[row][col] == BLACK_KING) {
+						
 						if (canJump(player, row, col, row + 1, col + 1, row +2, col + 2))
 							moves.add(new CheckersMove(row, col, row + 2, col + 2));
 						
@@ -728,10 +846,10 @@ TextField player2 = new TextField();
 							moves.add(new CheckersMove(row, col, row + 2, col ));
 						if (canJump(player, row, col, row - 1, col, row-2, col))
 							moves.add(new CheckersMove(row, col, row - 2, col ));
-						
+						king =1 ;
 						
 					}
-					
+					}
 					if(player == BLACK) {
 						pla = 2;
 						
@@ -814,10 +932,10 @@ TextField player2 = new TextField();
 				for (int row = 0; row < 8; row++) {
 					for (int col = 0; col < 8; col++) {
 						//foisssss
-						if (board[row][col] == playerKing)  {
+						if(board[row][col] == RED_KING || board[row][col] == BLACK_KING)  {
+							king = 1;
 							if (canMove(player, row, col, row , col + 1)) {
 								moves.add(new CheckersMove(row, col, row , col + 1));
-								
 							}
 							if (canMove(player, row, col, row , col - 1))
 								moves.add(new CheckersMove(row, col, row , col-1 ));
@@ -945,7 +1063,7 @@ TextField player2 = new TextField();
 			
 			ArrayList<CheckersMove> moves = new ArrayList<CheckersMove>(); // The legal jumps will be stored in this
 			// a modifierrrrrrrrrrrrrrrrrrrrrrrr																// list.
-			if(player == RED_KING || player == BLACK_KING) {
+			if(player== playerKing ) {
 				if (canJump(player, row, col, row + 1, col + 1, row +2, col + 2))
 					moves.add(new CheckersMove(row, col, row + 2, col + 2));
 				
@@ -1045,22 +1163,24 @@ TextField player2 = new TextField();
 
 			if (board[r3][c3] != EMPTY)
 				return false; // (r3,c3) already contains a piece.
+			
 			if(board[r1][c1] == RED ||board[r1][c1] == RED_DIA ||board[r1][c1] == BLACK ||board[r1][c1] == BLACK_DIA) {
 				if (board[r2][c2] == RED_KING || board[r2][c2] == BLACK_KING)
 					return false;
 			}
 			
-				if(board[r1][c1] == RED_KING && board[r2][c2] == BLACK_KING) {
+				if(board[r1][c1] == RED_KING && (board[r2][c2] == BLACK_KING || board[r2][c2] == BLACK || board[r2][c2] == BLACK_DIA)) {
 					
 					  return true;
 				   	
 				}
 				
 			
-				if (board[r1][c1] == BLACK_KING && board[r2][c2] == RED_KING) {
+				if (board[r1][c1] == BLACK_KING &&( board[r2][c2] == RED_KING || board[r2][c2] == RED || board[r2][c2] == RED_DIA)) {
 					return true;
 				}
-			
+				
+				
 			
 			if (player == RED) {
 				//if (board[r1][c1] == RED && r3 > r1)
